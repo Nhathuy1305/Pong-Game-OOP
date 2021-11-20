@@ -3,7 +3,8 @@
 #include <conio.h>
 using namespace std;
 
-//Create list of movement of the ball
+/* Create list of the movement of the ball and define them (mean set their variable to 0,1,...6) 
+ -> Meaning of "enum" function. */
 enum eDir{
     STOP = 0, 
     LEFT = 1, 
@@ -14,6 +15,16 @@ enum eDir{
     DOWNRIGHT = 6
 };
 
+/*  Class CBall has 9 functions, and 5 variables:
+First, focus on the 9 functions:
+    - First, the constructor to accept two variables input in integer data types.
+    - Function "Reset" to bring the ball come back to the originial position.
+    - Function "change_Dirrection" to change the ball direction when it hits the paddle.
+    - Function "random_Direction": When the ball hit the paddle, it turn out, so here we set this function to make it direction more complex.
+    - Function to getX(), getY() and get the direction get_Direction().
+    - Function to set up the movement of the ball (in the eDir list).
+    - A friend function to output the position index of the ball in Oxy.  
+*/ 
 class CBall{
     private:
         int x,y;
@@ -34,6 +45,7 @@ class CBall{
         }        
 };
 
+// Set the original positon of x and y (mean its direction is stop).
 CBall::CBall(int posX, int posY){
     originalX = posX;
     originalY = posY;
@@ -42,32 +54,39 @@ CBall::CBall(int posX, int posY){
     direction = STOP;
 }
 
+// Reset position of the ball when the game is done (original position).
 void CBall::Reset(){
     x = originalX;
     y = originalY;
     direction =STOP;
 }
 
+// Set direction for d.
 void CBall::change_Direction(eDir d){
     direction = d;
 }
 
+// Get x from the private.
 inline int CBall::getX(){
     return x;
 }
 
+// Get x from the private.
 inline int CBall::getY(){
     return y;
 }
 
+// Get Direction from the private.
 inline eDir CBall::get_Direction(){
     return direction;
 }
 
+// Random the dỉrection of the ball when it turns out of the paddle.
 void CBall::random_Direction(){
     direction = (eDir) ((rand()%6)+1);
 }
 
+// In this function, we use switch..case conditon to set the way for the ball movement basing on the Oxy coordinate.
 void CBall::Move(){
     switch(direction){
         case STOP:
@@ -79,26 +98,38 @@ void CBall::Move(){
             x++;
             break;
         case UPLEFT:
-            x--;
-            y--;
+            x--;     // The system runs from left to right and up to down, so the positive direction of x coordinate is from left to right
+            y--;     // and the positive direction of y coordinate is up to down.
             break;
-        case DOWNLEFT:
-            x--;
-            y++;
-            break;
-        case UPRIGHT:
-            x++;
-            y--;
-            break;
-        case DOWNRIGHT:
-            x++;
-            y++;
-            break;
+        case DOWNLEFT:      //           O ----------------------------> x
+            x--;            //            | 
+            y++;            //            |       
+            break;          //            |         
+        case UPRIGHT:       //            |          
+            x++;            //            |           
+            y--;            //            |           
+            break;          //            |                
+        case DOWNRIGHT:     //            |  
+            x++;            //            |  
+            y++;            //            |  
+            break;          //            v y 
         default:
             break;
     }
 }
 
+
+/* Class CPaddle use to create object paddle: 
+    - Default constructor to set the intitial position for 2 paddles. 
+    - Constructor knowing the complete information.
+    - When the game finish, the paddle will return to the initial position -> inline void Reset().
+    - Function to getX(), getY() in inline integer data types.
+    - The paddles will have 2 way of movement:
+        + Move up: moveUp().
+        + Move down: moveDown().
+        Both of them set in inline inline integer data types.
+    - A friend function to output the position index of the paddle in Oxy.
+*/
 class CPaddle{
     private:
         int x,y;
@@ -117,10 +148,14 @@ class CPaddle{
         }
 };
 
+// Default constructor.
 CPaddle::CPaddle(){
     x = y =0;
 }
 
+// Constructor to set up the initial position of 2 paddles:
+//      The left: x     (posX).
+//      The right: y    (posY).
 CPaddle::CPaddle(int posX, int posY) : CPaddle(){
     originalX = posX;
     originalY = posY;
@@ -128,27 +163,43 @@ CPaddle::CPaddle(int posX, int posY) : CPaddle(){
     y = posY;
 }
 
+// Reset the paddle coming back the first positon.
 inline void CPaddle::Reset(){
     x = originalX;
     y = originalY;
 }
 
+// Get x from the private.
 inline int CPaddle::getX(){
     return x;
 }
 
+// Get y from the private.
 inline int CPaddle::getY(){
     return y;
 }
 
+// The system run from left to right and up to down, so the positive of y coordinate is up to down.
+// The paddle move up: y--.
 inline void CPaddle::moveUp(){
     y--;
 }
 
+// The paddle move down: y++.
 inline void CPaddle::moveDown(){
     y++;
 }
 
+/* In this class, we use the pointer to establish for 3 objects: Ball, Paddle 1 and Paddle 2.
+    In the private class, we declare:
+        width, height, score1, score2.
+        The quit in boolean data type.
+    In the public:
+        - Constructor to input variable.
+        - When the game finish and refresh into the new chapter, we have to use the destructor to delete the 3 objects.
+        - Function Score_Up to score the result (increase) whenever 1 of 2 players win.
+        - Draw() function mean design the template of the play area: paddles, ball, frame collums and rows of the area.
+*/
 class CGameManager{
     private:
         int width,height;
@@ -305,6 +356,7 @@ void CGameManager::logic(){
         Score_Up(player2);
 }                        
 
+
 void CGameManager::run(){
     while (!quit){
         Draw();
@@ -316,5 +368,6 @@ void CGameManager::run(){
 int main(){
     CGameManager c(40,20);
     c.run();
+    getch();
     return 0;
 }
