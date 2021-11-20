@@ -190,7 +190,8 @@ inline void CPaddle::moveDown(){
     y++;
 }
 
-/* In this class, we use the pointer to establish for 3 objects: Ball, Paddle 1 and Paddle 2.
+/* 
+   In this class, we use the pointer to establish for 3 objects: Ball, Paddle 1 and Paddle 2.
     In the private class, we declare:
         width, height, score1, score2.
         The quit in boolean data type.
@@ -198,7 +199,10 @@ inline void CPaddle::moveDown(){
         - Constructor to input variable.
         - When the game finish and refresh into the new chapter, we have to use the destructor to delete the 3 objects.
         - Function Score_Up to score the result (increase) whenever 1 of 2 players win.
-        - Draw() function mean design the template of the play area: paddles, ball, frame collums and rows of the area.
+        - Draw() function mean design the template of the play area: paddles, ball, frame columns and rows of the area.
+        - Funtion input() for the user interact with the game approving keyboards (Type the keyboards then the paddle moving/game starts).
+        - Logic(): change direction of the ball (interact between ball and paddle) divided into 2 part: left and right. 
+        - Run() function to call 3 function: Draw(), Input(), Logic(), respectively.
 */
 class CGameManager{
     private:
@@ -219,74 +223,87 @@ class CGameManager{
     void run();
 };
 
+// Constructors to create w, h in integer data types
 CGameManager::CGameManager(int w, int h){
-    srand(time(NULL));
-    quit = false;
+    // Set random number seed, to create a random number that do not coincide evertime the system iterative: srand(time(NULL)). 
+    // (Ex: the first time is 1, the second will not meet 1 again, neither the third,...).
+    srand(time(NULL));   
+    quit = false;   // Set up quit when the program is false, stop.
     up1 = 'w';
     up2 = 'i';
     down1 = 's';
     down2 = 'k';
-    score1 = score2 = 0;
+    score1 = score2 = 0;           // The initial result of 2 players.
     width = w;
     height = h;
-    ball = new CBall(w/2, h/2);
-    player1 = new CPaddle(1, h/2 - 3);
-    player2 = new CPaddle(w-2, h/2 - 3);    
+    ball = new CBall(w/2, h/2);     // Create new ball by constructor on line 49.
+    player1 = new CPaddle(1, h/2 - 3);    // Create new left paddle. 
+    player2 = new CPaddle(w-2, h/2 - 3);    // Create new right paddle.
 }
 
+// Destructor clear 3 objects when 1 of 2 players let the ball get out of range.
 CGameManager::~CGameManager(){
-    delete ball, player1, player2;
+    delete ball, player1, player2;   
 }
 
+// Score points for each players:
+/* 
+    Rules:
+        - 2 players start moving own paddle, and spike the ball.
+        - If 1 of them cannot spikes it and let the ball get out of play area, the function score will chalk up
+          for the other one (1 point).      
+*/
 void CGameManager::Score_Up(CPaddle * player){
-    if(player == player1) score1++;
+    if(player == player1) score1++;                    // If 1 of 2 object: player1/player2 equal to pointer player -> Score point.
     else if (player == player2) score2++;
 
-    ball -> Reset();
+    ball -> Reset();                       // Score points then reset 3 objects: ball, player1, player2.
     player1->Reset();
     player2->Reset();
 }
 
 void CGameManager::Draw(){
-    system("cls");    //cls = clear
+    system("cls");                       //cls = clear
     for(int i = 0; i < width+2; i++)
-        cout << "\xB2";
+        cout << "\xB2";                  // \xB2 is symbol: Start -> Run -> Type "charmap" -> Choose symbol then look in the left bottom.
     cout << endl;
 
+    // Draw
     for(int i = 0; i < height; i++){
         for(int j = 0; j < width; j++){
-            int ballx = ball->getX();
-            int bally = ball->getY();
-            int player1x = player1->getX();
+            int ballx = ball->getX();         // Set objective for ball (x,y).
+            int bally = ball->getY();         
+            int player1x = player1->getX();     // Set objective for paddle (x,y).
             int player2x = player2->getX();
             int player1y = player1->getY();
             int player2y = player2->getY();
 
-            if(j == 0) cout << "\xB2";
+            if(j == 0) cout << "\xB2";           // Draw paddle left.
 
-            if (ballx == j && bally == i) cout << "O";
-            else if (player1x == j && player1y == i) cout << "\xDB";  //player1   
+            
+            if (ballx == j && bally == i) cout << "O";  // Draw ball
+            else if (player1x == j && player1y == i) cout << "\xDB";  //player1      // Draw 2 rows.
             else if (player2x == j && player2y == i) cout << "\xDB";  //player2
             
-            else if (player1x == j && player1y + 1 == i) cout << "\xDB";  //player1   
+            else if (player1x == j && player1y + 1 == i) cout << "\xDB";  //player1     
             else if (player1x == j && player1y + 2 == i) cout << "\xDB";  //player1   
             else if (player1x == j && player1y + 3 == i) cout << "\xDB";  //player1   
 
-            else if (player2x == j && player2y + 1 == i) cout << "\xDB";  //player2
+            else if (player2x == j && player2y + 1 == i) cout << "\xDB";  //player2      
             else if (player2x == j && player2y + 2 == i) cout << "\xDB";  //player2
             else if (player2x == j && player2y + 3 == i) cout << "\xDB";  //player2
             else cout << " ";
 
-            if (j == width - 1) cout << "\xB2";
+            if (j == width - 1) cout << "\xB2";  // Draw paddle right.
         }
         cout << endl;
     }
 
     for(int i = 0; i < width+2; i++)
-        cout << "\xB2"; 
+        cout << "\xB2";                // Draw row bottom.
     cout << endl;
 
-    cout << "Score 1: " << score1 << endl << "Score 2: " << score2 << endl;  
+    cout << "Score 1: " << score1 << endl << "Score 2: " << score2 << endl;   // Print out the result of 2 players.
 }
 
 void CGameManager::input(){
@@ -299,26 +316,28 @@ void CGameManager::input(){
     int player1y = player1->getY();
     int player2y = player2->getY();
 
+    // The _kbhit function checks the console for a recent keystroke. 
+    // If the function returns a nonzero value, a keystroke is waiting in the buffer. 
     if(_kbhit()){
-        char current = _getch();
-        if (current == up1)
+        char current = _getch();       // On line 232 -> 235, the valid characters on the keyboard to move the paddle is 'w','s','i','k'.
+        if (current == up1)                     
             if (player1y > 0)
-                player1->moveUp();
+                player1->moveUp();     // w
         if (current == up2)
             if (player2y > 0)
-                player2->moveUp();
+                player2->moveUp();     // i
         if (current == down1)
             if (player1y + 4 < height)
-                player1->moveDown();
+                player1->moveDown();   // s
         if (current == down2)
             if (player2y + 4 < height)
-                player2->moveDown();
+                player2->moveDown();   // k
 
         if(ball->get_Direction() == STOP)
-            ball->random_Direction();
+            ball->random_Direction();   // The game stop when the user do not type anything from keyboard.
 
         if (current == 'q')
-            quit = true;  
+            quit = true;               // Type 'q' to stop
     }
 }
 
@@ -330,13 +349,15 @@ void CGameManager::logic(){
     int player1y = player1->getY();
     int player2y = player2->getY();
 
-    //left paddle
+    // left paddle
+    // The ball hit the paddle then it change its direction in 3 random ways.  
     for(int i = 0; i < 4; i++)
         if (ballx == player1x + 1)
             if (bally == player1y + i)
-                ball->change_Direction((eDir)((rand()%3)+4));
+                ball->change_Direction((eDir)((rand()%3)+4));    
 
-    //right paddle
+    // right paddle
+    // The ball hit the paddle then it change its direction in 3 random ways.
     for(int i = 0; i < 4; i++)
         if (ballx == player2x - 1)
             if (bally == player2y + i)
@@ -350,13 +371,13 @@ void CGameManager::logic(){
         ball->change_Direction(ball->get_Direction() == UPRIGHT ? DOWNRIGHT : DOWNLEFT);
     //right wall
     if (ballx == width - 1)
-        Score_Up(player1);
+        Score_Up(player1);            // If ball get out of play area on the right (width - 1) -> Score for 1.
     //left wall
     if (ballx == 0)
-        Score_Up(player2);
+        Score_Up(player2);            // If ball get out of play area on the left (0) -> Score for 2. 
 }                        
 
-
+// Run the program.
 void CGameManager::run(){
     while (!quit){
         Draw();
